@@ -1,5 +1,5 @@
 #include "visualization.h"
-#define FILE_PATH "test.wav"
+#define FILE_PATH "test1.wav" //https://www.youtube.com/watch?v=qNf9nzvnd1k
 
 /*
 freq = i * Fs / N;      (1)
@@ -82,8 +82,10 @@ void PlayAudioCallback(void* userData, Uint8* stream, int streamLength) {
 			max_magnitude_index = i;
 		}
 	}
-	int freq = max_magnitude_index * ( 44100 / 4096 ) * 4;
-	std::cout << max_magnitude_index << std::endl << std::flush;
+	int freq = max_magnitude_index * ( 44100 / 4096 ) * 4 ;
+	if( freq < 22500 ){
+		std::cout << freq << std::endl << std::flush;
+	}
 	
 
 //	SDL_memcpy(&in, sampData, sizeof(sampData));
