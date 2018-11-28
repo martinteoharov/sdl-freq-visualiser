@@ -1,5 +1,6 @@
 #include "visualization.h"
-#define FILE_PATH "test1.wav" //https://www.youtube.com/watch?v=qNf9nzvnd1k
+#define FILE_PATH "audiosamples/test1.wav" //https://www.youtube.com/watch?v=qNf9nzvnd1k
+#define PI 3.14159265359
 
 /*
 freq = i * Fs / N;      (1)
@@ -35,8 +36,7 @@ Uint8* wavStart;
 Uint32 wavLength;
 SDL_AudioDeviceID aDevice;
 double arrSamples[4096];
-int magnitude[4096], max_magnitude_index;
-
+double max_magnitude_index;
 
 
 struct AudioData {
@@ -47,8 +47,9 @@ struct AudioData {
 void PlayAudioCallback(void* userData, Uint8* stream, int streamLength) {
 	AudioData* audio = (AudioData*)userData;
 	sampData = (Uint8*)stream;
+	double magnitude[4096];
 	fftw_complex x[4096], y[4096];
-	int max_magnitude = 0;
+	double max_magnitude = 0;
 
 	if (audio->fileLength == 0) {
 		return;
@@ -56,10 +57,11 @@ void PlayAudioCallback(void* userData, Uint8* stream, int streamLength) {
 
 	Uint32 length = (Uint32)streamLength;
 	length = (length > audio->fileLength ? audio->fileLength : length);
-	std::vector<int> samples (stream, stream + length);
+	std::vector<double> samples (stream, stream + length);
 	
 	for( int i = 0; i < 4096; i ++ ){
-		x[i][REAL] = (int)samples[i];
+		double multiplier = 0.5 * (1 - cos(2*PI*i/4096));
+		x[i][REAL] = (double)samples[i];
 		x[i][IMAG] = 0.0;
 	}
 	
@@ -82,10 +84,8 @@ void PlayAudioCallback(void* userData, Uint8* stream, int streamLength) {
 			max_magnitude_index = i;
 		}
 	}
-	int freq = max_magnitude_index * ( 44100 / 4096 ) * 4 ;
-	if( freq < 22500 ){
-		std::cout << freq << std::endl << std::flush;
-	}
+	int freq = max_magnitude_index * ( 44100 / 4096 );
+	std::cout << freq << std::endl << std::flush;
 	
 
 //	SDL_memcpy(&in, sampData, sizeof(sampData));
@@ -132,10 +132,7 @@ int main() {
 		visualization -> handleEvents();
 		visualization -> render();
 		cnt ++;
-		if( cnt == 100 ){
-			visualization -> update(max_magnitude_index);
-			cnt=0;
-		}
+		visualization -> update(max_magnitude_index, cnt);
 	}
 
 	visualization->clean();
