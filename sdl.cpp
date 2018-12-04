@@ -60,6 +60,16 @@ void SDL::handleEvents(){
 }
 
 void SDL::update( int max_magnitude_index, int cnt){
+	if( rect[max_magnitude_index].h > -100 ){
+		rect[max_magnitude_index].h -= 1;
+	}
+	if( cnt % 10 == 0 ){
+		for( int i = 0; i < visualBuffers; i ++ ){
+			if( rect[i].h < 10 ){
+				rect[i].h ++;
+			}
+		}
+	}
 }
 
 

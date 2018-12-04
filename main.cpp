@@ -1,5 +1,5 @@
 #include "visualization.h"
-#define FILE_PATH "audiosamples/test1.wav" //https://www.youtube.com/watch?v=qNf9nzvnd1k
+#define FILE_PATH "audiosamples/test.wav" //https://www.youtube.com/watch?v=qNf9nzvnd1k
 #define PI 3.14159265359
 
 /*
@@ -18,20 +18,21 @@ Fs = 44100       //a common sample rate [frames per sec] for audio signals: 44.1
 The spectral bin numbers aka frequency bins using equation (1) from above would be:
 
     bin:      i      Fs         N            freq
-     0  :     0  *  44100 /  2048  =        0.0 Hz
-     1  :     1  *  44100 /  2048  =        21.5 Hz
-     2  :     2  *  44100 /  2048  =        43 Hz
-     3  :     3  *  44100 /  2048  =        64.5 Hz
+     0  :     0  *  44100 /  4096  =        0.0 Hz
+     1  :     1  *  44100 /  4096  =        21.5 Hz
+     2  :     2  *  44100 /  4096  =        43 Hz
+     3  :     3  *  44100 /  4096  =        64.5 Hz
      4  :     ...
      5  :     ...
 
-   1024 :    1024 * 44100 /  2048  =        22.05 kHz
+   4096 :    4096 * 44100 /  4096  =        22.05 kHz
 */
 
 SDL *visualization = nullptr;
 
 Uint8* sampData;
 SDL_AudioSpec wavSpec;
+SDL_AudioSpec obtained;
 Uint8* wavStart;
 Uint32 wavLength;
 SDL_AudioDeviceID aDevice;
@@ -60,9 +61,11 @@ void PlayAudioCallback(void* userData, Uint8* stream, int streamLength) {
 	std::vector<double> samples (stream, stream + length);
 	
 	for( int i = 0; i < 4096; i ++ ){
-		double multiplier = 0.5 * (1 - cos(2*PI*i/4096));
+		double multiplier = (1 - cos((2*PI*i)/4096));
+	//	x[i][REAL] = multiplier * (double)samples[i];
 		x[i][REAL] = (double)samples[i];
 		x[i][IMAG] = 0.0;
+	//	std::cout << i << " - " << x[i][REAL] << std::endl << std::flush;
 	}
 	
 	fftw_plan plan = fftw_plan_dft_1d( 4096, x, y,  FFTW_FORWARD, FFTW_ESTIMATE );
@@ -70,24 +73,24 @@ void PlayAudioCallback(void* userData, Uint8* stream, int streamLength) {
 
 	for( int i = 0; i < 4096; i ++ ){
 		if( y[i][IMAG] < 0 ){
-		//	std::cout << y[i][REAL] << " - " << abs(y[i][IMAG]) << std::endl;
 			magnitude[i] = sqrt( y[i][REAL] * y[i][REAL] + y[i][IMAG] * y[i][IMAG] );
 		}
 		else{
-			//std::cout << y[i][REAL] << " + " << abs(y[i][IMAG])  << std::endl;
 			magnitude[i] = sqrt( y[i][REAL] * y[i][REAL] + y[i][IMAG] * y[i][IMAG] );
 		}
 	}
-	for( int i = 1; i < 4096; i ++ ){
+	for( int i = 1; i < 3000; i ++ ){
 		if( magnitude[i] > max_magnitude ){
 			max_magnitude = magnitude[i];
 			max_magnitude_index = i;
 		}
 	}
 	int freq = max_magnitude_index * ( 44100 / 4096 );
-	std::cout << freq << std::endl << std::flush;
+	if( freq < 20000 ){
+		std::cout << freq << std::endl << std::flush;
+	}
+	else std::cout << "skip" << std::endl;
 	
-
 //	SDL_memcpy(&in, sampData, sizeof(sampData));
 	SDL_memcpy(stream, audio->filePosition, length);
 
@@ -113,20 +116,20 @@ int main() {
 	AudioData audio;
 	audio.filePosition = wavStart;
 	audio.fileLength = wavLength;
+	wavSpec.samples = 1024;
 
 	wavSpec.callback = PlayAudioCallback;
 	wavSpec.userdata = &audio;
-//	std::cout << wavSpec.samples;
-//	SDL_Delay( 300 );
 
 
-	aDevice = SDL_OpenAudioDevice(NULL, 0, &wavSpec, NULL, SDL_AUDIO_ALLOW_ANY_CHANGE);
+	aDevice = SDL_OpenAudioDevice( NULL, 0, &wavSpec, &obtained, SDL_AUDIO_ALLOW_FREQUENCY_CHANGE);
 	if (aDevice == 0) {
 		std::cerr << "Audio Device connection failed: " << SDL_GetError() << std::endl;
 		getchar();
 	}
 	SDL_PauseAudioDevice(aDevice, 0);
 
+	std::cout << obtained.samples << std::endl << std::flush;
 
 	while( visualization -> running () ){
 		visualization -> handleEvents();
