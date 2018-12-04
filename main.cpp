@@ -1,5 +1,5 @@
 #include "visualization.h"
-#define FILE_PATH "audiosamples/test.wav" //https://www.youtube.com/watch?v=qNf9nzvnd1k
+#define FILE_PATH "audiosamples/tove.wav" //https://www.youtube.com/watch?v=qNf9nzvnd1k
 #define PI 3.14159265359
 
 /*
