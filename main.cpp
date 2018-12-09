@@ -38,6 +38,8 @@ Uint32 wavLength;
 SDL_AudioDeviceID aDevice;
 double arrSamples[4096];
 double max_magnitude_index;
+int cnt = 0;
+int pos;
 
 
 struct AudioData {
@@ -58,6 +60,15 @@ void PlayAudioCallback(void* userData, Uint8* stream, int streamLength) {
 
 	Uint32 length = (Uint32)streamLength;
 	length = (length > audio->fileLength ? audio->fileLength : length);
+	if( visualization->left() ){
+		audio->filePosition -= 10*length;
+		audio->fileLength += 10*length;
+	}
+	if( visualization->right() ){
+		audio->filePosition += 20*length;
+		audio->fileLength -= 20*length;
+	}
+	pos = audio->fileLength;
 	std::vector<double> samples (stream, stream + length);
 	
 	for( int i = 0; i < 4096; i ++ ){
@@ -79,17 +90,17 @@ void PlayAudioCallback(void* userData, Uint8* stream, int streamLength) {
 			magnitude[i] = sqrt( y[i][REAL] * y[i][REAL] + y[i][IMAG] * y[i][IMAG] );
 		}
 	}
-	for( int i = 1; i < 3000; i ++ ){
+	for( int i = 1; i < 1000; i ++ ){
 		if( magnitude[i] > max_magnitude ){
 			max_magnitude = magnitude[i];
 			max_magnitude_index = i;
 		}
 	}
 	int freq = max_magnitude_index * ( 44100 / 4096 );
-	if( freq < 20000 ){
-		std::cout << freq << std::endl << std::flush;
-	}
+	/*
+	if( freq < 20000 ) std::cout << freq << std::endl << std::flush;
 	else std::cout << "skip" << std::endl;
+	*/
 	
 //	SDL_memcpy(&in, sampData, sizeof(sampData));
 	SDL_memcpy(stream, audio->filePosition, length);
@@ -101,7 +112,6 @@ void PlayAudioCallback(void* userData, Uint8* stream, int streamLength) {
 }
 
 int main() {
-	int cnt = 0;
 
 	visualization = new SDL();
 	visualization -> init( "asd", 100, 0, 800, 400, false );
@@ -135,7 +145,9 @@ int main() {
 		visualization -> handleEvents();
 		visualization -> render();
 		cnt ++;
-		visualization -> update(max_magnitude_index, cnt);
+		visualization -> update(max_magnitude_index, cnt, pos);
+		//std::cout << " - " << cnt;
+		//std::cout << std::endl;
 	}
 
 	visualization->clean();

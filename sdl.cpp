@@ -35,10 +35,29 @@ void SDL::init( const char* title, int x, int y, int width, int height, bool ful
 			for( int i = 0; i < visualBuffers; i ++ ){
 				rect[i].x = xlen;
 				rect[i].y = 310;
-				rect[i].w = 10;
+				rect[i].w = 7.5;
 				rect[i].h = -100;
-				xlen += 11;
+				xlen += 8;
 			}
+			audioPos.y = 99;
+			audioPos.h = 3;
+			audioPos.w = 10;
+			audioPos.x = 77;
+
+			audioPath.x = 75;
+			audioPath.w = 675;
+			audioPath.h = 1;
+			audioPath.y = 103;
+			 
+			audioStart.x = 73;
+			audioStart.w = 3;
+			audioStart.h = 10;
+			audioStart.y = 96;
+
+			audioEnd.x = 750;
+			audioEnd.w = 3;
+			audioEnd.h = 10;
+			audioEnd.y = 96;
 		}
 
 		isRunning = true;
@@ -54,12 +73,21 @@ void SDL::handleEvents(){
 		case SDL_QUIT:
 			isRunning = false;
 			break;
+		case SDL_KEYDOWN:
+			key = SDL_GetKeyName( e.key.keysym.sym);
+			if( key == "Left" ){
+				isLeft = true;
+			}
+			if( key == "Right" ){
+				isRight = true;
+			}
+			break;
 		default:
 			break;
 	}
 }
 
-void SDL::update( int max_magnitude_index, int cnt){
+void SDL::update( int max_magnitude_index, int cnt, int pos){
 	if( rect[max_magnitude_index].h > -100 ){
 		rect[max_magnitude_index].h -= 1;
 	}
@@ -70,6 +98,12 @@ void SDL::update( int max_magnitude_index, int cnt){
 			}
 		}
 	}
+	if( cnt % 1000 == 0 ){
+		isLeft = false;
+		isRight = false;
+	}
+	audioPos.w = ( 65289844 - pos ) / 100000;
+	std::cout << pos << '\r' << std::flush;
 }
 
 
@@ -81,6 +115,12 @@ void SDL::render(){
 	for( int i = 0; i < visualBuffers; i ++ ){
 		SDL_RenderFillRect( renderer, &rect[i] );
 	}
+	SDL_SetRenderDrawColor( renderer, 40, 80, 80, 0 );
+	SDL_RenderFillRect( renderer, &audioPos );
+	SDL_SetRenderDrawColor( renderer, 10, 80, 60, 0 );
+	SDL_RenderFillRect( renderer, &audioStart );
+	SDL_RenderFillRect( renderer, &audioEnd );
+	SDL_RenderFillRect( renderer, &audioPath );
 
 	SDL_SetRenderDrawColor( renderer, 10, 20, 30, 0 );
 	SDL_RenderPresent( renderer );
