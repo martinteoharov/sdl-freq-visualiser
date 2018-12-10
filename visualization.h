@@ -42,6 +42,7 @@ class SDL {
 		SDL_Rect audioPos;
 		SDL_Rect audioStart, audioEnd, audioPath;
 		int xlen = 40;
+		int startPos;
 
 };
 

@@ -1,5 +1,5 @@
 #include "visualization.h"
-#define FILE_PATH "audiosamples/tove.wav" //https://www.youtube.com/watch?v=qNf9nzvnd1k
+#define FILE_PATH "audiosamples/whitenoise_music.wav" //https://www.youtube.com/watch?v=qNf9nzvnd1k
 #define PI 3.14159265359
 
 /*
@@ -91,7 +91,7 @@ void PlayAudioCallback(void* userData, Uint8* stream, int streamLength) {
 		}
 	}
 	for( int i = 1; i < 1000; i ++ ){
-		if( magnitude[i] > max_magnitude ){
+		if( magnitude[i] > max_magnitude && i > 10 ){
 			max_magnitude = magnitude[i];
 			max_magnitude_index = i;
 		}

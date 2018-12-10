@@ -39,6 +39,7 @@ void SDL::init( const char* title, int x, int y, int width, int height, bool ful
 				rect[i].h = -100;
 				xlen += 8;
 			}
+			//audio position bar
 			audioPos.y = 99;
 			audioPos.h = 3;
 			audioPos.w = 10;
@@ -50,14 +51,14 @@ void SDL::init( const char* title, int x, int y, int width, int height, bool ful
 			audioPath.y = 103;
 			 
 			audioStart.x = 73;
-			audioStart.w = 3;
-			audioStart.h = 10;
-			audioStart.y = 96;
+			audioStart.w = 2;
+			audioStart.h = 6;
+			audioStart.y = 97;
 
 			audioEnd.x = 750;
-			audioEnd.w = 3;
-			audioEnd.h = 10;
-			audioEnd.y = 96;
+			audioEnd.w = 2;
+			audioEnd.h = 6;
+			audioEnd.y = 97;
 		}
 
 		isRunning = true;
@@ -93,7 +94,7 @@ void SDL::update( int max_magnitude_index, int cnt, int pos){
 	}
 	if( cnt % 10 == 0 ){
 		for( int i = 0; i < visualBuffers; i ++ ){
-			if( rect[i].h < 10 ){
+			if( rect[i].h < 5 ){
 				rect[i].h ++;
 			}
 		}
@@ -102,8 +103,13 @@ void SDL::update( int max_magnitude_index, int cnt, int pos){
 		isLeft = false;
 		isRight = false;
 	}
-	audioPos.w = ( 65289844 - pos ) / 100000;
-	std::cout << pos << '\r' << std::flush;
+	if( cnt == 1 ){
+		startPos = pos;
+		audioPath.w = pos / 100000;
+		audioEnd.x = pos / 100000 + 76;
+	}
+	audioPos.w = ( startPos - pos ) / 100000;
+	std::cout << pos / 100000 << '\r' << std::flush;
 }
 
 
