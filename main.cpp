@@ -1,5 +1,5 @@
 #include "visualization.h"
-#define FILE_PATH "audiosamples/whitenoise_music.wav" //https://www.youtube.com/watch?v=qNf9nzvnd1k
+#define FILE_PATH "audiosamples/faded.wav" //https://www.youtube.com/watch?v=qNf9nzvnd1k
 #define PI 3.14159265359
 
 /*
@@ -36,8 +36,8 @@ SDL_AudioSpec obtained;
 Uint8* wavStart;
 Uint32 wavLength;
 SDL_AudioDeviceID aDevice;
+int magnitude[4096];
 double arrSamples[4096];
-double max_magnitude_index;
 int cnt = 0;
 int pos;
 
@@ -50,9 +50,7 @@ struct AudioData {
 void PlayAudioCallback(void* userData, Uint8* stream, int streamLength) {
 	AudioData* audio = (AudioData*)userData;
 	sampData = (Uint8*)stream;
-	double magnitude[4096];
 	fftw_complex x[4096], y[4096];
-	double max_magnitude = 0;
 
 	if (audio->fileLength == 0) {
 		return;
@@ -61,16 +59,22 @@ void PlayAudioCallback(void* userData, Uint8* stream, int streamLength) {
 	Uint32 length = (Uint32)streamLength;
 	length = (length > audio->fileLength ? audio->fileLength : length);
 	if( visualization->left() ){
-		audio->filePosition -= 10*length;
-		audio->fileLength += 10*length;
+		audio->filePosition -= 20*length;
+		audio->fileLength += 20*length;
 	}
 	if( visualization->right() ){
 		audio->filePosition += 20*length;
 		audio->fileLength -= 20*length;
 	}
+	if( visualization->isMouseClicked() ){
+		if( visualization->getX() > 75 && visualization->getX() < 700 && visualization->getY() > 95 && visualization->getY() < 120 ){
+			std::cout << visualization->getX() << " " << visualization->getY() << std::endl << std::flush;
+		}
+	}
 	pos = audio->fileLength;
+	//std::cout << pos << std::flush << std::endl;
 	std::vector<double> samples (stream, stream + length);
-	
+
 	for( int i = 0; i < 4096; i ++ ){
 		double multiplier = (1 - cos((2*PI*i)/4096));
 	//	x[i][REAL] = multiplier * (double)samples[i];
@@ -78,7 +82,7 @@ void PlayAudioCallback(void* userData, Uint8* stream, int streamLength) {
 		x[i][IMAG] = 0.0;
 	//	std::cout << i << " - " << x[i][REAL] << std::endl << std::flush;
 	}
-	
+
 	fftw_plan plan = fftw_plan_dft_1d( 4096, x, y,  FFTW_FORWARD, FFTW_ESTIMATE );
 	fftw_execute(plan);
 
@@ -90,18 +94,7 @@ void PlayAudioCallback(void* userData, Uint8* stream, int streamLength) {
 			magnitude[i] = sqrt( y[i][REAL] * y[i][REAL] + y[i][IMAG] * y[i][IMAG] );
 		}
 	}
-	for( int i = 1; i < 1000; i ++ ){
-		if( magnitude[i] > max_magnitude && i > 10 ){
-			max_magnitude = magnitude[i];
-			max_magnitude_index = i;
-		}
-	}
-	int freq = max_magnitude_index * ( 44100 / 4096 );
-	/*
-	if( freq < 20000 ) std::cout << freq << std::endl << std::flush;
-	else std::cout << "skip" << std::endl;
-	*/
-	
+
 //	SDL_memcpy(&in, sampData, sizeof(sampData));
 	SDL_memcpy(stream, audio->filePosition, length);
 
@@ -114,7 +107,7 @@ void PlayAudioCallback(void* userData, Uint8* stream, int streamLength) {
 int main() {
 
 	visualization = new SDL();
-	visualization -> init( "asd", 100, 0, 800, 400, false );
+	visualization -> init( "asd", 100, 0, 1300, 400, false );
 	SDL_Init(SDL_INIT_AUDIO);
 
 	if (SDL_LoadWAV(FILE_PATH, &wavSpec, &wavStart, &wavLength) == NULL) {
@@ -145,7 +138,7 @@ int main() {
 		visualization -> handleEvents();
 		visualization -> render();
 		cnt ++;
-		visualization -> update(max_magnitude_index, cnt, pos);
+		visualization -> update(magnitude, cnt, pos);
 		//std::cout << " - " << cnt;
 		//std::cout << std::endl;
 	}
