@@ -170,9 +170,7 @@ void SDL::update( int magnitude[visualBuffers], int cnt, int pos){
 
 void SDL::render(){
 	SDL_RenderClear( renderer );
-	//stuff to render
 	SDL_SetRenderDrawColor( renderer, 10, 50, 50, 0 );
-	//draws every rect
 	for( int i = 0; i < visualBuffers; i ++ ){
 		SDL_SetRenderDrawColor( renderer, 10, 75, 75, 0 );
 		SDL_RenderFillRect( renderer, &rect[i] );

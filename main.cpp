@@ -1,5 +1,5 @@
 #include "visualization.h"
-#define FILE_PATH "audiosamples/faded.wav" //https://www.youtube.com/watch?v=qNf9nzvnd1k
+#define FILE_PATH "audiosamples/deafkev.wav" //https://www.youtube.com/watch?v=qNf9nzvnd1k
 #define PI 3.14159265359
 
 /*
@@ -40,6 +40,7 @@ int magnitude[4096];
 double arrSamples[4096];
 int cnt = 0;
 int pos;
+std::string filepath;
 
 
 struct AudioData {
@@ -104,17 +105,24 @@ void PlayAudioCallback(void* userData, Uint8* stream, int streamLength) {
 
 }
 
-int main() {
+int main( int argc, char *argv[] ) {
 
 	visualization = new SDL();
 	visualization -> init( "asd", 100, 0, 1300, 400, false );
 	SDL_Init(SDL_INIT_AUDIO);
+	filepath = argv[1];
 
+	if (SDL_LoadWAV(argv[1], &wavSpec, &wavStart, &wavLength) == NULL) {
+		std::cerr << "Couldnt load file: " << argv[0] << std::endl;
+		getchar();
+	}
+	/*
 	if (SDL_LoadWAV(FILE_PATH, &wavSpec, &wavStart, &wavLength) == NULL) {
 		std::cerr << "Couldnt load file: " << FILE_PATH << std::endl;
 		getchar();
 	}
-	std::cout << "Loaded " << FILE_PATH << std::endl;
+	*/
+	std::cout << "Loaded " << argv[1] << std::endl;
 
 	AudioData audio;
 	audio.filePosition = wavStart;
