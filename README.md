@@ -10,4 +10,4 @@ Use only 4096 sample rate .wav files as others may cause problems.
 
 # Build
 
-To build and run simply go to the main directory and use `make && ./visualisation ./audiosample.wav
+To build and run simply go to the main directory and use `make && ./visualisation ./audiosample.wav`
