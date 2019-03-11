@@ -9,6 +9,10 @@
 #include <X11/Xlib.h>
 #include <fftw3.h>
 #include <vector>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sstream>
+
 
 const int visualBuffers = 1200;
 const int midRangeBuffer = 150;

@@ -36,10 +36,12 @@ SDL_AudioSpec obtained;
 Uint8* wavStart;
 Uint32 wavLength;
 SDL_AudioDeviceID aDevice;
-int magnitude[4096];
+int magnitude[4096], last_magnitude[4096];
 double arrSamples[4096];
 int cnt = 0;
 int pos;
+bool first = true;
+int total_magnitude = 0;
 std::string filepath;
 
 
@@ -75,9 +77,10 @@ void PlayAudioCallback(void* userData, Uint8* stream, int streamLength) {
 	pos = audio->fileLength;
 	//std::cout << pos << std::flush << std::endl;
 	std::vector<double> samples (stream, stream + length);
+	//std::cout << "vector size =" << samples.size() << std::endl;
 
 	for( int i = 0; i < 4096; i ++ ){
-		double multiplier = (1 - cos((2*PI*i)/4096));
+	//	double multiplier = (1 - cos((2*PI*i)/4096));
 	//	x[i][REAL] = multiplier * (double)samples[i];
 		x[i][REAL] = (double)samples[i];
 		x[i][IMAG] = 0.0;
@@ -95,10 +98,25 @@ void PlayAudioCallback(void* userData, Uint8* stream, int streamLength) {
 			magnitude[i] = sqrt( y[i][REAL] * y[i][REAL] + y[i][IMAG] * y[i][IMAG] );
 		}
 	}
+	if( first ){
+		for( int i = 0; i < 4096; i ++ ){
+			last_magnitude[i] = magnitude[i];
+		}
+		first = false;
+	}
 
 //	SDL_memcpy(&in, sampData, sizeof(sampData));
 	SDL_memcpy(stream, audio->filePosition, length);
 
+	//std::cout << magnitude[0] << " -- " << magnitude[1] << " -- " << magnitude[2]<< std::endl;
+	
+	for( int i = 10; i < 1000; i ++ ){
+		total_magnitude += magnitude[i];	
+	}
+	if( total_magnitude > 3000000 ){
+		std::cout << total_magnitude << std::endl;
+	}
+	total_magnitude = 0;
 
 	audio->filePosition += length;
 	audio->fileLength -= length;
@@ -108,9 +126,20 @@ void PlayAudioCallback(void* userData, Uint8* stream, int streamLength) {
 int main( int argc, char *argv[] ) {
 
 	visualization = new SDL();
-	visualization -> init( "asd", 100, 0, 1300, 400, false );
+	visualization -> init( "", 100, 300, 1300, 400, false );
 	SDL_Init(SDL_INIT_AUDIO);
 	filepath = argv[1];
+
+
+	// | O_NOCTTY
+	int open_result = open("/dev/ttyUSB0", O_RDWR );
+
+	if( open_result == 0 ){
+		std::cout << "Port Opened Successfully" << std::endl;
+	}
+	else{
+		printf("Port Failed to Open: %s.\n", strerror(errno));
+	}
 
 	if (SDL_LoadWAV(argv[1], &wavSpec, &wavStart, &wavLength) == NULL) {
 		std::cerr << "Couldnt load file: " << argv[0] << std::endl;

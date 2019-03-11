@@ -22,6 +22,7 @@ void SDL::init( const char* title, int x, int y, int width, int height, bool ful
 	if( SDL_Init( SDL_INIT_EVERYTHING ) == 0 ){
 		std::cout << "Subsystems Initialised!..." << std::endl;
 		window = SDL_CreateWindow ( title, x, y, width, height, flags );
+		//SDL_SetWindowBordered( window , SDL_FALSE);
 		if( window ){
 			std::cout << "Window created!" << std::endl;
 		}
@@ -105,7 +106,7 @@ void SDL::handleEvents(){
 			break;
 		case SDL_MOUSEBUTTONDOWN:
 			SDL_GetMouseState(&xcoord, &ycoord);
-			std::cout << xcoord << " - " << ycoord << std::endl << std::flush;
+	//		std::cout << xcoord << " - " << ycoord << std::endl << std::flush;
 			mouseClicked = true;
 		default:
 			break;
@@ -140,11 +141,12 @@ void SDL::update( int magnitude[visualBuffers], int cnt, int pos){
 	if( cnt % 10 == 0 ){
 		for( int i = 0; i < visualBuffers; i ++ ){
 			if( rect[i].h < 5 ){
-				rect[i].h ++;
+				rect[i].h += 2;
 			}
 			if( i < midRangeBuffer ){
 				if( midRangeRect[i].h < -5 ){
-					midRangeRect[i].h += 2;
+					midRangeRect[i].h = 0;
+					//midRangeRect[i].h += 2;
 				}
 			}
 		}
@@ -164,7 +166,7 @@ void SDL::update( int magnitude[visualBuffers], int cnt, int pos){
 	//	std::cout << pos << " - " << audioEnd.x << std::flush << std::endl;
 	}
 	audioPos.w = ( startPos - pos ) / 100000;
-	std::cout << pos / 100000 << '\r' << std::flush;
+	//std::cout << pos / 100000 << '\r' << std::flush;
 }
 
 
